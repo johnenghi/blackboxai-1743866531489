@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pure Status App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        body {
+            background: #f8f9fa;
+            color: #333;
+        }
+        .header {
+            background: #128C7E;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .status-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        .status-card {
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .status-header {
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+        .status-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        .status-content {
+            width: 100%;
+        }
+        .status-video {
+            width: 100%;
+            display: block;
+        }
+        .status-footer {
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 14px;
+        }
+        .upload-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #128C7E;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Status Updates</h1>
+    </header>
+
+    <div class="status-container">
+        <div class="status-card">
+            <div class="status-header">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" class="status-avatar">
+                <div>
+                    <div class="status-name">Sarah Johnson</div>
+                    <div class="status-time">2 hours ago</div>
+                </div>
+            </div>
+            <video controls class="status-video">
+                <source src="sample.mp4" type="video/mp4">
+            </video>
+            <div class="status-footer">
+                <span>12 views</span>
+                <span>♥ 8 likes</span>
+            </div>
+        </div>
+    </div>
+
+    <button class="upload-btn">+</button>
+
+    <script>
+        // Will add functionality in next steps
+    </script>
+</body>
+</html>
