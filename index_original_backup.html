@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Status Compressor</title>
+    <style>
+        /* Inlined Tailwind CSS styles */
+        body { font-family: sans-serif; margin: 0; padding: 0; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .dropzone { border: 2px dashed #ccc; padding: 40px; text-align: center; cursor: pointer; }
+        .dropzone.active { border-color: #3b82f6; background-color: #eff6ff; }
+        .btn { background-color: #3b82f6; color: white; padding: 10px 20px; border-radius: 5px; }
+        .hidden { display: none; }
+        /* Additional custom styles */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WhatsApp Status Compressor</h1>
+        
+        <div id="dropzone" class="dropzone">
+            <p>Drag & drop your video file here</p>
+            <button id="fileBtn" class="btn">Or click to select file</button>
+            <input type="file" id="fileInput" class="hidden" accept="video/mp4,video/quicktime">
+        </div>
+
+        <video id="previewVideo" class="hidden" controls></video>
+
+        <div id="progressContainer" class="hidden">
+            <p>Compressing video...</p>
+        </div>
+
+        <div id="downloadContainer" class="hidden">
+            <button id="downloadBtn" class="btn">Download Compressed Video</button>
+        </div>
+    </div>
+
+    <script>
+    // WhatsApp Status Compressor - Complete Inlined Solution
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('App initialized successfully');
+        
+        // Get DOM elements
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const fileBtn = document.getElementById('fileBtn');
+        const previewVideo = document.getElementById('previewVideo');
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        // Initialize functionality
+        fileBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // Drag and drop handlers
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, unhighlight, false);
+        });
+        
+        dropzone.addEventListener('drop', handleDrop, false);
+        
+        // Core functions
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        function highlight() {
+            dropzone.classList.add('active');
+        }
+        
+        function unhighlight() {
+            dropzone.classList.remove('active');
+        }
+        
+        function handleDrop(e) {
+            const files = e.dataTransfer.files;
+            if (files.length) handleFiles(files);
+        }
+        
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length) handleFiles(files);
+        }
+        
+        function handleFiles(files) {
+            const file = files[0];
+            if (!file.type.match(/video\/(mp4|quicktime)/)) {
+                return alert('Please upload a valid video file (MP4 or MOV)');
+            }
+            
+            // Show preview
+            previewVideo.src = URL.createObjectURL(file);
+            previewVideo.classList.remove('hidden');
+            
+            // Prepare for upload
+            uploadFile(file);
+        }
+        
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            fetch('/api/compress', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('downloadContainer').classList.remove('hidden');
+                    downloadBtn.onclick = () => {
+                        window.location.href = `/api/download/${data.filename}`;
+                    };
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Compression failed. Please try again.');
+            });
+        }
+    });
+    </script>
+</body>
+</html>
