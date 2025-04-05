@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Status Compressor</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 0; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .dropzone { border: 2px dashed #ccc; padding: 40px; text-align: center; cursor: pointer; }
+        .dropzone.active { border-color: #3b82f6; background-color: #eff6ff; }
+        .btn {
+            background: #3b82f6;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 5px;
+            margin: 15px 0;
+            cursor: pointer;
+            font: bold 16px sans-serif;
+            border: 0;
+            transition: all .3s;
+        }
+        .btn:hover {
+            background-color: #2563eb;
+            transform: scale(1.05);
+        }
+        #compressBtn {
+            background-color: #10b981;
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+        #compressBtn:hover {
+            background-color: #059669;
+        }
+        .hidden { display: none; }
+        /* Simple upload animation */
+        .upload-progress {
+            height: 4px;
+            background: #e0e0e0;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .upload-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #3b82f6;
+            transition: width 0.3s ease;
+        }
+        .video-container {
+            max-width: 100%;
+            margin: 20px 0;
+            background: #f5f5f5;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #previewVideo {
+            max-width: 100%;
+            max-height: 60vh;
+            display: block;
+            margin: 0 auto;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WhatsApp Status Compressor</h1>
+        <p>Upload your video to compress it for WhatsApp status</p>
+        
+        <div id="dropzone" class="dropzone">
+            <p>Drag and drop your video file here</p>
+            <button id="fileBtn" class="btn">Or click to select file</button>
+            <input type="file" id="fileInput" class="hidden" accept="video/mp4,video/quicktime">
+        </div>
+
+        <div class="video-container hidden">
+            <video id="previewVideo" controls loading="lazy"></video>
+        </div>
+
+        <div id="progressContainer" class="hidden">
+            <div class="upload-progress hidden">
+                <div class="progress-bar"></div>
+            </div>
+            <button id="compressBtn" class="btn">Compress Now</button>
+            <div id="downloadContainer" class="hidden">
+                <button id="downloadBtn" class="btn">Download Compressed Video</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropzone = document.getElementById('dropzone');
+            const fileInput = document.getElementById('fileInput');
+            const fileBtn = document.getElementById('fileBtn');
+            const previewVideo = document.getElementById('previewVideo');
+            const compressBtn = document.getElementById('compressBtn');
+
+            // File selection handling
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                if (!file.type.match('video.*')) {
+                    alert('Please upload a valid video file (MP4 or MOV)');
+                    return;
+                }
+                
+                // Show upload progress
+                document.getElementById('uploadProgress').classList.remove('hidden');
+                const progressBar = document.getElementById('uploadProgressBar');
+                
+                // Simulate upload progress (replace with real upload progress in production)
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 5;
+                    progressBar.style.width = `${progress}%`;
+                    if (progress >= 100) {
+                        clearInterval(progressInterval);
+                        document.querySelector('.video-container').classList.remove('hidden');
+                        previewVideo.src = URL.createObjectURL(file);
+                        document.getElementById('progressContainer').classList.remove('hidden');
+                    }
+                }, 100);
+            });
+
+            // Compression handler
+            compressBtn.addEventListener('click', async function() {
+                const file = fileInput.files[0];
+                compressBtn.disabled = true;
+                compressBtn.textContent = 'Compressing...';
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    
+                    const response = await fetch('/api/compress', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        document.getElementById('downloadContainer').classList.remove('hidden');
+                        document.getElementById('downloadBtn').dataset.downloadUrl = data.downloadUrl;
+                    } else {
+                        throw new Error(data.error || 'Compression failed');
+                    }
+                } catch (error) {
+                    console.error('Compression error:', error);
+                    alert('Compression failed. Please try again.');
+                } finally {
+                    compressBtn.disabled = false;
+                    compressBtn.textContent = 'Compress Now';
+                }
+            });
+
+            // Download handler
+            document.getElementById('downloadBtn').addEventListener('click', function() {
+                const downloadUrl = this.dataset.downloadUrl;
+                if (downloadUrl) {
+                    window.location.href = downloadUrl;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
