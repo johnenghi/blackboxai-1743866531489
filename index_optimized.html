@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Previous head content remains the same -->
+    <style>
+        /* Previous styles remain */
+        .hidden { display: none; }
+        /* Animation styles */
+    </style>
+</head>
+<body>
+    <!-- Previous HTML structure remains -->
+
+    <script>
+        // State management function
+        function setUploadState(state) {
+            const states = {
+                'idle': () => {
+                    document.getElementById('uploadingAnimation').classList.add('hidden');
+                    document.getElementById('compressingAnimation').classList.add('hidden');
+                    document.getElementById('compressBtn').disabled = false;
+                    document.getElementById('compressBtn').textContent = 'Compress Now';
+                },
+                'uploading': () => {
+                    document.getElementById('uploadingAnimation').classList.remove('hidden');
+                    document.getElementById('compressingAnimation').classList.add('hidden');
+                },
+                'compressing': () => {
+                    document.getElementById('uploadingAnimation').classList.add('hidden');
+                    document.getElementById('compressingAnimation').classList.remove('hidden');
+                    document.getElementById('compressBtn').disabled = true;
+                    document.getElementById('compressBtn').textContent = 'Compressing...';
+                }
+            };
+            states[state]();
+        }
+
+        // Updated event handlers using state management
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.querySelector('.video-container').classList.remove('hidden');
+                document.getElementById('previewVideo').src = URL.createObjectURL(file);
+                document.getElementById('progressContainer').classList.remove('hidden');
+                setUploadState('idle');
+            }
+        });
+
+        document.getElementById('compressBtn').addEventListener('click', async function() {
+            setUploadState('compressing');
+            // Rest of compression logic
+        });
+
+        // Error handling would use setUploadState('idle')
+    </script>
+</body>
+</html>
