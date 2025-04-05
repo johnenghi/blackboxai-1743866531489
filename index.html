@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+        <title>WhatsApp Status Compressor</title>
+    <style>
+        /* All previous styles remain */
+        body { font-family: sans-serif; margin: 0; padding: 0; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .dropzone { border: 2px dashed #ccc; padding: 40px; text-align: center; cursor: pointer; }
+        .dropzone.active { border-color: #3b82f6; background-color: #eff6ff; }
+        .btn {
+            background: #3b82f6;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 5px;
+            margin: 15px 0;
+            cursor: pointer;
+            font: bold 16px sans-serif;
+            border: 0;
+            transition: all .3s;
+        }
+        .btn:hover {
+            background-color: #2563eb;
+            transform: scale(1.05);
+        }
+        #compressBtn {
+            background-color: #10b981;
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+        #compressBtn:hover {
+            background-color: #059669;
+        }
+        .hidden { display: none; }
+        #progressBar {
+            height: 5px;
+            background-color: #3b82f6;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        /* Loading Animations */
+        .loading-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(59,130,246,0.3);
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-text {
+            color: #3b82f6;
+            font-weight: bold;
+        }
+        .video-container {
+            max-width: 100%;
+            margin: 20px 0;
+            background: #f5f5f5;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #previewVideo {
+            max-width: 100%;
+            max-height: 60vh;
+            display: block;
+            margin: 0 auto;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WhatsApp Status Compressor</h1>
+        
+        <div id="dropzone" class="dropzone">
+            <p>Drag & drop your video file here</p>
+            <button id="fileBtn" class="btn">Or click to select file</button>
+            <input type="file" id="fileInput" class="hidden" accept="video/mp4,video/quicktime">
+        </div>
+
+        <div class="video-container hidden">
+            <video id="previewVideo" controls loading="lazy"></video>
+        </div>
+
+        <div id="progressContainer" class="hidden">
+            <button id="compressBtn" class="btn">Compress Now</button>
+            <div id="uploadingAnimation" class="hidden loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Uploading...</div>
+            </div>
+            <div id="compressingAnimation" class="hidden loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Compressing...</div>
+            </div>
+            <div id="progressBar"></div>
+        </div>
+
+        <div id="downloadContainer" class="hidden">
+            <button id="downloadBtn" class="btn">Download Compressed Video</button>
+        </div>
+    </div>
+
+    <script>
+        function setUploadState(state) {
+            const states = {
+                'idle': () => {
+                    document.getElementById('uploadingAnimation').classList.add('hidden');
+                    document.getElementById('compressingAnimation').classList.add('hidden');
+                    document.getElementById('compressBtn').classList.remove('hidden');
+                    document.getElementById('compressBtn').disabled = false;
+                    document.getElementById('compressBtn').textContent = 'Compress Now';
+                },
+                'uploading': () => {
+                    document.getElementById('uploadingAnimation').classList.remove('hidden');
+                    document.getElementById('compressingAnimation').classList.add('hidden');
+                },
+                'compressing': () => {
+                    document.getElementById('uploadingAnimation').classList.add('hidden');
+                    document.getElementById('compressingAnimation').classList.remove('hidden');
+                    document.getElementById('compressBtn').disabled = true;
+                    document.getElementById('compressBtn').textContent = 'Compressing...';
+                }
+            };
+            states[state]();
+        }
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const fileBtn = document.getElementById('fileBtn');
+        const previewVideo = document.getElementById('previewVideo');
+        
+        // Improved file selection handling
+        fileBtn.addEventListener('click', () => {
+            fileInput.value = ''; // Reset input to allow re-selecting same file
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                handleFile(this.files);
+            }
+        });
+
+        // Enhanced drag and drop
+        ['dragenter', 'dragover'].forEach(event => {
+            dropzone.addEventListener(event, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(event => {
+            dropzone.addEventListener(event, unhighlight, false);
+        });
+
+        dropzone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files);
+            }
+        });
+
+        function highlight() {
+            dropzone.classList.add('active');
+        }
+
+        function unhighlight() {
+            dropzone.classList.remove('active');
+        }
+
+        function handleFile(files) {
+            const file = files[0];
+            if (!file.type.match(/video\/(mp4|quicktime)/)) {
+                alert('Please upload a valid video file (MP4 or MOV)');
+                return;
+            }
+            
+            // Show video and controls
+            document.querySelector('.video-container').classList.remove('hidden');
+            previewVideo.src = URL.createObjectURL(file);
+            document.getElementById('progressContainer').classList.remove('hidden');
+            setUploadState('idle');
+        }
+
+        // Add compress button handler
+        document.getElementById('compressBtn').addEventListener('click', async function() {
+            const file = document.getElementById('fileInput').files[0];
+            const compressBtn = this;
+            
+            if (file) {
+                try {
+                    // Show loading state
+                    compressBtn.disabled = true;
+                    compressBtn.textContent = 'Compressing...';
+                    compressBtn.style.backgroundColor = '#059669';
+                    
+                    // Show progress container
+                    document.getElementById('progressContainer').classList.remove('hidden');
+                    
+                    // Upload and compress file
+                    await uploadFile(file);
+                    
+                    // Reset button state
+                    compressBtn.disabled = false;
+                    compressBtn.textContent = 'Compress Now';
+                    compressBtn.style.backgroundColor = '#10b981';
+                    
+                } catch (error) {
+                    console.error('Compression error:', error);
+                    document.getElementById('uploadingAnimation').classList.add('hidden');
+                    document.getElementById('compressingAnimation').classList.add('hidden');
+                    alert('Compression failed. Please try again.');
+                    compressBtn.disabled = false;
+                    compressBtn.textContent = 'Try Again';
+                }
+            } else {
+                alert('Please select a video file first');
+            }
+        });
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const response = await fetch('/api/compress', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error('Server error');
+            }
+            
+            const data = await response.json();
+            if (data.status === 'success') {
+                document.getElementById('downloadContainer').classList.remove('hidden');
+                return true;
+            }
+            throw new Error(data.error || 'Compression failed');
+        }
+
+        // Download button handler
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const downloadUrl = '/api/download/compressed.mp4';
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = 'compressed_video.mp4';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        // Update this in the uploadFile success handler:
+        // Add: document.getElementById('downloadBtn').dataset.downloadUrl = data.downloadUrl;
+    });
+    </script>
+</body>
+</html>
