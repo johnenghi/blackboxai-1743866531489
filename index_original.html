@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Status Compressor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .dropzone {
+            transition: all 0.3s ease;
+        }
+        .dropzone.active {
+            border-color: #3b82f6;
+            background-color: #f0f7ff;
+        }
+        #previewVideo {
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-md overflow-hidden p-6">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">WhatsApp Status Compressor</h1>
+            <p class="text-gray-600">Compress your WhatsApp status videos without losing quality</p>
+        </div>
+
+        <div id="dropzone" class="dropzone border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer mb-6">
+            <div class="flex flex-col items-center justify-center">
+                <i class="fas fa-video text-gray-400 text-5xl mb-3"></i>
+                <p class="text-gray-600 mb-1">Drag & drop your WhatsApp status video here</p>
+                <p class="text-sm text-gray-500 mb-3">or</p>
+                <button id="fileBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Select Video
+                </button>
+                <input type="file" id="fileInput" class="hidden" accept="video/mp4,video/quicktime">
+            </div>
+        </div>
+
+        <video id="previewVideo" class="w-full rounded-lg hidden mt-4" controls></video>
+
+        <div id="progressContainer" class="hidden mb-6">
+            <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700">Converting...</span>
+                <span id="progressPercent" class="text-sm font-medium text-gray-700">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="progressBar" class="bg-blue-500 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div id="errorContainer" class="hidden p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg"></div>
+
+        <div id="successContainer" class="hidden p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg"></div>
+
+        <div id="downloadContainer" class="hidden text-center">
+            <button id="downloadBtn" class="px-6 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                Download Word Document
+            </button>
+        </div>
+    </div>
+
+    <script>
+    // WhatsApp Status Compressor - Inlined Client Script
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('App initialized successfully');
+        
+        // Get DOM elements
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const previewVideo = document.getElementById('previewVideo');
+        
+        // Basic functionality test
+        if (dropzone && fileInput && previewVideo) {
+            console.log('All required elements found');
+            dropzone.addEventListener('click', () => {
+                console.log('Dropzone clicked');
+                fileInput.click();
+            });
+        } else {
+            console.error('Missing required elements');
+        }
+    });
+    </script>
+</body>
+</html>
